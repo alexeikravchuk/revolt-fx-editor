@@ -1,4 +1,5 @@
 import 'es6-promise/auto'
+import './canvas-will-read-frequently.js'
 import './pixi-global.js'
 import { createApp } from 'vue'
 import ElementPlus from 'element-plus'
