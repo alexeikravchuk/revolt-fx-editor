@@ -4,6 +4,7 @@ import {
   EVENT_EMITTER_AUTO_ROTATION_CHANGED, EVENT_EMITTER_CHILDS_CHANGED,
   EVENT_EMITTER_CORE_CHANGED,
   EVENT_EMITTER_CORE_PARAMS_CHANGED,
+  EVENT_EMITTER_DURATION_CHANGED,
   EVENT_EMITTER_INFINITE_CHANGED,
   EVENT_EMITTER_PRESET_REMOVED,
   EVENT_EMITTER_PRESET_SELECTED,
@@ -119,6 +120,7 @@ export class Editor {
 
     eventBus.$on(EVENT_EMITTER_PRESET_SELECTED, preset => this.onEmitterPresetChanged(preset));
     eventBus.$on(EVENT_EMITTER_PRESET_REMOVED, preset => this.onEmitterPresetRemoved(preset));
+    eventBus.$on(EVENT_EMITTER_DURATION_CHANGED, () => this.onEmitterDurationChanged());
     eventBus.$on(EVENT_EMITTER_INFINITE_CHANGED, value => this.onEmitterInfiniteValueChanged(value));
     eventBus.$on(EVENT_EMITTER_CORE_CHANGED, value => this.onEmitterCoreChanged(value));
     eventBus.$on(EVENT_EMITTER_CORE_PARAMS_CHANGED, value => this.onEmitterCoreParamsChanged());
@@ -343,10 +345,10 @@ export class Editor {
   loadDefaultBundle() {
     return new Promise(async (resolve, reject) => {
 
-      await this.loadSpriteSheetRemote('./static/revoltfx-spritesheet.json', 'fx-');
+      await this.loadSpriteSheetRemote('/revoltfx-spritesheet.json', 'fx-');
 
       PIXI.loader.reset();
-      PIXI.loader.add('def', './static/default-bundle.json').load((l, resources) => {
+      PIXI.loader.add('def', '/default-bundle.json').load((l, resources) => {
         this.vue.$store.commit(SET_BUNDLE, resources.def.data);
         this.vue.$fx.initBundle(resources.def.data, true);
         resolve();
@@ -588,6 +590,18 @@ export class Editor {
   // *********************************************************************************************
   // * Events								                                        													   *
   // *********************************************************************************************
+
+  onEmitterDurationChanged() {
+    if (!this.emitter || !this.emitterGizmo) return;
+    const x = this.emitter.x;
+    const y = this.emitter.y;
+    const rotation = this.emitter.rotation;
+    this.removeEmitter();
+    this.emitter = this.createEmitter();
+    this.emitter.x = x;
+    this.emitter.y = y;
+    this.emitter.rotation = rotation;
+  }
 
   onEmitterInfiniteValueChanged(value) {
     if (this.emitter) {

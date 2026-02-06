@@ -752,6 +752,7 @@ import {
   EVENT_EMITTER_CHILDS_CHANGED,
   EVENT_EMITTER_CORE_CHANGED,
   EVENT_EMITTER_CORE_PARAMS_CHANGED,
+  EVENT_EMITTER_DURATION_CHANGED,
   EVENT_EMITTER_INFINITE_CHANGED,
   EVENT_EMITTER_ROTATION_CHANGED,
 } from "../events";
@@ -939,6 +940,11 @@ export default {
     "data.infinite": {
       handler(newVal, oldVal) {
         this.$eventBus.$emit(EVENT_EMITTER_INFINITE_CHANGED, newVal);
+      },
+    },
+    "data.duration": {
+      handler() {
+        this.$eventBus.$emit(EVENT_EMITTER_DURATION_CHANGED);
       },
     },
     "data.rotation": {
