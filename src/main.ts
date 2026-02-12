@@ -12,9 +12,9 @@ import App from './App.vue'
 import store from './store.ts'
 import { eventBus } from './eventBus.ts'
 import { Editor } from './editor/editor.ts'
+import { FX } from 'revolt-fx'
 
-async function init(): Promise<void> {
-  const { FX } = await import('revolt-fx')
+function init(): void {
   const fx = new FX()
   Editor.fx = fx
 
