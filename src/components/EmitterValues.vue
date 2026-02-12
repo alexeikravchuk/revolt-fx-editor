@@ -740,7 +740,6 @@
 <script setup lang="ts">
 import { computed, watch, getCurrentInstance } from "vue";
 import { ElMessageBox } from "element-plus";
-import ImageSelect from "./imageselect/ImageSelect.vue";
 import ValueGroup from "./values/ValueGroup.vue";
 import NumberValue from "./values/NumberValue.vue";
 import SelectValue from "./values/SelectValue.vue";
@@ -758,8 +757,6 @@ import {
   EVENT_EMITTER_INFINITE_CHANGED,
   EVENT_EMITTER_ROTATION_CHANGED,
 } from "../events";
-import AngleDegreeSlider from "./values/AngleDegreeSlider.vue";
-import List from "./list/List.vue";
 import SpawnList from "./SpawnList.vue";
 import ChildList from "./ChildList.vue";
 import Help from "./Help.vue";
