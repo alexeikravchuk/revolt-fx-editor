@@ -23,80 +23,80 @@
   </div>
 </template>
 
-<script setup>
-defineOptions({ name: "SidePanel" });
-import { ref, computed, onMounted, onUnmounted, getCurrentInstance } from "vue";
-import { useStore } from "vuex";
-import EmitterList from "./EmitterList.vue";
-import EmitterValues from "./EmitterValues.vue";
-import EngineValues from "./EngineValues.vue";
-import SequenceList from "./SequenceList.vue";
-import SequenceValues from "./SequenceValues.vue";
+<script setup lang="ts">
+defineOptions({ name: 'SidePanel' })
+import { ref, computed, onMounted, onUnmounted, getCurrentInstance } from 'vue'
+import { useStore } from 'vuex'
+import EmitterList from './EmitterList.vue'
+import EmitterValues from './EmitterValues.vue'
+import EngineValues from './EngineValues.vue'
+import SequenceList from './SequenceList.vue'
+import SequenceValues from './SequenceValues.vue'
 import {
   EVENT_EMITTER_PRESET_REMOVED,
   EVENT_EMITTER_PRESET_SELECTED,
   EVENT_RESET,
   EVENT_SEQUENCE_PRESET_SELECTED,
-} from "../events";
+} from '../events'
 
-const store = useStore();
-const instance = getCurrentInstance();
-const eventBus = instance.appContext.config.globalProperties.$eventBus;
-const editor = () => instance.appContext.config.globalProperties.$editor;
-const fx = () => instance.appContext.config.globalProperties.$fx;
+const store = useStore()
+const instance = getCurrentInstance()
+const eventBus = instance?.appContext.config.globalProperties.$eventBus
+const editor = () => instance?.appContext.config.globalProperties.$editor
+const fx = () => instance?.appContext.config.globalProperties.$fx
 
-const emitterPreset = ref(null);
-const sequencePreset = ref(null);
+const emitterPreset = ref<any>(null)
+const sequencePreset = ref<any>(null)
 
-const bundleSettings = computed(() => store.state.bundle);
+const bundleSettings = computed(() => store.state.bundle)
 
-function onEmitterSelected(preset) {
-  emitterPreset.value = preset;
-  sequencePreset.value = null;
-  const ed = editor();
-  if (ed?.layers?.floorGizmoLayer) ed.layers.floorGizmoLayer.visible = true;
+function onEmitterSelected(preset: any) {
+  emitterPreset.value = preset
+  sequencePreset.value = null
+  const ed = editor()
+  if (ed?.layers?.floorGizmoLayer) ed.layers.floorGizmoLayer.visible = true
 }
 
-function onEmitterRemoved(preset) {
+function onEmitterRemoved(preset: any) {
   if (emitterPreset.value === preset) {
-    emitterPreset.value = null;
+    emitterPreset.value = null
   }
 }
 
-function onSequenceSelected(preset) {
-  emitterPreset.value = null;
-  sequencePreset.value = preset;
-  const ed = editor();
-  if (ed?.layers?.floorGizmoLayer) ed.layers.floorGizmoLayer.visible = false;
+function onSequenceSelected(preset: any) {
+  emitterPreset.value = null
+  sequencePreset.value = preset
+  const ed = editor()
+  if (ed?.layers?.floorGizmoLayer) ed.layers.floorGizmoLayer.visible = false
 }
 
-function onSequenceRemoved(preset) {
+function onSequenceRemoved(preset: any) {
   if (sequencePreset.value === preset) {
-    sequencePreset.value = null;
+    sequencePreset.value = null
   }
 }
 
 function handleTabClick() {
-  eventBus.$emit(EVENT_EMITTER_PRESET_SELECTED, null);
-  eventBus.$emit(EVENT_SEQUENCE_PRESET_SELECTED, null);
-  eventBus.$emit(EVENT_RESET);
-  const fxInstance = fx();
-  if (fxInstance) fxInstance.stopAllEffects();
+  eventBus?.$emit(EVENT_EMITTER_PRESET_SELECTED, null)
+  eventBus?.$emit(EVENT_SEQUENCE_PRESET_SELECTED, null)
+  eventBus?.$emit(EVENT_RESET)
+  const fxInstance = fx()
+  if (fxInstance) fxInstance.stopAllEffects()
 }
 
 onMounted(() => {
-  eventBus.$on(EVENT_EMITTER_PRESET_SELECTED, onEmitterSelected);
-  eventBus.$on(EVENT_EMITTER_PRESET_REMOVED, onEmitterRemoved);
-  eventBus.$on(EVENT_SEQUENCE_PRESET_SELECTED, onSequenceSelected);
-  eventBus.$on(EVENT_EMITTER_PRESET_REMOVED, onSequenceRemoved);
-});
+  eventBus?.$on(EVENT_EMITTER_PRESET_SELECTED, onEmitterSelected)
+  eventBus?.$on(EVENT_EMITTER_PRESET_REMOVED, onEmitterRemoved)
+  eventBus?.$on(EVENT_SEQUENCE_PRESET_SELECTED, onSequenceSelected)
+  eventBus?.$on(EVENT_EMITTER_PRESET_REMOVED, onSequenceRemoved)
+})
 
 onUnmounted(() => {
-  eventBus.$off(EVENT_EMITTER_PRESET_SELECTED, onEmitterSelected);
-  eventBus.$off(EVENT_EMITTER_PRESET_REMOVED, onEmitterRemoved);
-  eventBus.$off(EVENT_SEQUENCE_PRESET_SELECTED, onSequenceSelected);
-  eventBus.$off(EVENT_EMITTER_PRESET_REMOVED, onSequenceRemoved);
-});
+  eventBus?.$off(EVENT_EMITTER_PRESET_SELECTED, onEmitterSelected)
+  eventBus?.$off(EVENT_EMITTER_PRESET_REMOVED, onEmitterRemoved)
+  eventBus?.$off(EVENT_SEQUENCE_PRESET_SELECTED, onSequenceSelected)
+  eventBus?.$off(EVENT_EMITTER_PRESET_REMOVED, onSequenceRemoved)
+})
 </script>
 
 <style scoped>

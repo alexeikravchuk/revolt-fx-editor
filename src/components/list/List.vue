@@ -23,133 +23,115 @@
   </div>
 </template>
 
-<script>
-  import ListEntry from "./ListEntry.vue";
-  import {EVENT_RESET} from "../../events";
+<script setup lang="ts">
+import { ref, onMounted, getCurrentInstance } from 'vue'
+import { ElMessageBox } from 'element-plus'
+import ListEntry from './ListEntry.vue'
+import { EVENT_RESET } from '../../events'
 
-  export default {
-    name: "List",
-    components: {ListEntry},
-    props: {
-      elements: Array,
-      cloneButton: {
-        type: Boolean,
-        default: true
-      },
-      renameButton: {
-        type: Boolean,
-        default: true
-      },
-      useDefaultNamePrompt: {
-        type: Boolean,
-        default: true
-      },
-      nameCallback: {
-        type: Function
-      },
-      prefixCallback: {
-        type: Function
-      },
-      iconCallback: {
-        type: Function
-      },
-      checkNameCallback: {
-        type: Function
-      },
-      alwaysSelect: {
-        type: Boolean,
-        default: false
-      },
-      subEntryFilter: {
-        type: String,
-        default: null
-      }
-    },
-    mounted() {
-      this.$eventBus.$on(EVENT_RESET, () => {
-        this.selectedElement = null;
-      });
-    },
-    methods: {
+const props = withDefaults(
+  defineProps<{
+    elements?: any[]
+    cloneButton?: boolean
+    renameButton?: boolean
+    useDefaultNamePrompt?: boolean
+    nameCallback?: (data: any) => string
+    prefixCallback?: (data: any) => string | null
+    iconCallback?: (data: any) => string | null
+    checkNameCallback?: (name: string) => boolean
+    alwaysSelect?: boolean
+    subEntryFilter?: string | null
+  }>(),
+  { cloneButton: true, renameButton: true, useDefaultNamePrompt: true, alwaysSelect: false, subEntryFilter: null }
+)
 
-      namePrompt(inputValue) {
-        return this.$prompt('Please enter a name.', 'Enter Name', {
-          confirmButtonText: 'OK',
-          cancelButtonText: 'Cancel',
-          inputValue: inputValue
+const emit = defineEmits<{ select: [el: any]; remove: [el: any]; rename: [el: any, name: string]; clone: [el: any, name: string]; add: [name?: string] }>()
 
-        });
-      },
-      onSelected(element) {
-        if (this.selectedElement === element && !this.alwaysSelect) return;
-        this.selectedElement = element;
-        this.$emit('select', element);
-      },
-      async onRemove(element) {
-        try {
-          await this.$confirm('This will delete the selection.', 'Warning', {
-            confirmButtonText: 'OK',
-            cancelButtonText: 'Cancel',
-            type: 'warning'
-          });
-          this.$emit('remove', element);
-          this.selectedElement = null;
-        } catch (e) {
-        }
-      },
-      async onRename(e) {
-        try {
-          const name = await this.enterName(this.selectedElement.data.name);
-          this.$emit('rename', this.selectedElement, name);
-        } catch (e) {
-        }
-      },
-      async onClone(e) {
-        try {
-          const name = await this.enterName(this.selectedElement.data.name);
-          this.$emit('clone', this.selectedElement, name);
-        } catch (e) {
-        }
-      },
-      async onAdd(e) {
-        if (this.useDefaultNamePrompt) {
-          try {
-            const name = await this.enterName();
-            this.$emit('add', name);
-          } catch (e) {
-          }
-        } else {
-          this.$emit('add');
-        }
+const instance = getCurrentInstance()
+const eventBus = instance?.appContext.config.globalProperties.$eventBus
 
-      },
-      enterName(inputValue) {
-        return new Promise(async (resolve, reject) => {
-          try {
-            const result = await this.namePrompt(inputValue);
-            if (this.checkNameCallback) {
-              if (!this.checkNameCallback(result.value)) {
+const selectedElement = ref<any>(null)
 
-                this.$alert(`Name '${ result.value }' already exists!`, 'Oh no!', {type: 'error'});
-                reject();
-                return;
-              }
-            }
-            resolve(result.value);
-          } catch (e) {
-            reject();
-          }
-        });
-      }
-    },
-    watch: {},
-    data() {
-      return {
-        selectedElement: null,
-        newName: ''
-      }
-    }
+function namePrompt(inputValue?: string) {
+  return ElMessageBox.prompt('Please enter a name.', 'Enter Name', {
+    confirmButtonText: 'OK',
+    cancelButtonText: 'Cancel',
+    inputValue: inputValue ?? '',
+  })
+}
+
+function onSelected(element: any) {
+  if (selectedElement.value === element && !props.alwaysSelect) return
+  selectedElement.value = element
+  emit('select', element)
+}
+
+async function onRemove(element: any) {
+  try {
+    await ElMessageBox.confirm('This will delete the selection.', 'Warning', {
+      confirmButtonText: 'OK',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
+    })
+    emit('remove', element)
+    selectedElement.value = null
+  } catch {
+    // cancelled
   }
+}
+
+async function onRename() {
+  try {
+    const name = await enterName(selectedElement.value?.data?.name)
+    emit('rename', selectedElement.value, name)
+  } catch {
+    // cancelled
+  }
+}
+
+async function onClone() {
+  try {
+    const name = await enterName(selectedElement.value?.data?.name)
+    emit('clone', selectedElement.value, name)
+  } catch {
+    // cancelled
+  }
+}
+
+async function onAdd() {
+  if (props.useDefaultNamePrompt) {
+    try {
+      const name = await enterName()
+      emit('add', name)
+    } catch {
+      // cancelled
+    }
+  } else {
+    emit('add')
+  }
+}
+
+function enterName(inputValue?: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    namePrompt(inputValue)
+      .then((result: any) => {
+        const val = result?.value ?? ''
+        if (props.checkNameCallback && !props.checkNameCallback(val)) {
+          ElMessageBox.alert(`Name '${val}' already exists!`, 'Oh no!', { type: 'error' })
+          reject(new Error('duplicate'))
+          return
+        }
+        resolve(val)
+      })
+      .catch(reject)
+  })
+}
+
+onMounted(() => {
+  eventBus?.$on(EVENT_RESET, () => {
+    selectedElement.value = null
+  })
+})
 </script>
 
 <style lang="scss" scoped>

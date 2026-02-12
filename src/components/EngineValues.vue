@@ -13,31 +13,25 @@
   </div>
 </template>
 
-<script>
-  import ValueGroup from "./values/ValueGroup.vue";
-  import NumberValue from "./values/NumberValue.vue";
-  import {RevoltFX} from 'revolt-fx';
-  import Help from "./Help.vue";
+<script setup lang="ts">
+import { watch, getCurrentInstance } from 'vue'
+import ValueGroup from './values/ValueGroup.vue'
+import NumberValue from './values/NumberValue.vue'
+import Help from './Help.vue'
 
-  export default {
-    name: "EngineValues",
-    components: {Help, NumberValue, ValueGroup},
-    props: ['data'],
+defineOptions({ name: 'EngineValues' })
+const props = defineProps<{ data: any }>()
 
-    computed: {},
-    watch: {
-      'data.maxParticles': {
-        handler(newVal, oldVal) {
-          this.$fx.maxParticles = newVal;
-        }
-      },
-      'data.useBlendModes': {
-        handler(newVal, oldVal) {
-          this.$fx.useBlendModes = newVal;
-        }
-      }
-    }
-  }
+const instance = getCurrentInstance()
+const fx = () => instance?.appContext.config.globalProperties.$fx
+
+watch(() => props.data?.maxParticles, (newVal) => {
+  if (fx() && newVal != null) fx().maxParticles = newVal
+})
+
+watch(() => props.data?.useBlendModes, (newVal) => {
+  if (fx() && newVal != null) fx().useBlendModes = newVal
+})
 </script>
 
 <style scoped>

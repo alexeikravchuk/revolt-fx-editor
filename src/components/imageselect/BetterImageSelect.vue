@@ -1,5 +1,5 @@
 <template>
-  <div style="position: relative;" @mouseover="over=true" @mouseout="over=false">
+  <div style="position: relative;">
     <div class="current-thumb">
       <image-select-thumb :src="thumbSrc" @select="onShowSelection"/>
     </div>
@@ -24,57 +24,43 @@
   </div>
 </template>
 
-<script>
-  import * as PIXI from 'pixi.js';
-  import ImageSelectThumb from "./ImageSelectThumb.vue";
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import ImageSelectThumb from './ImageSelectThumb.vue'
 
+defineOptions({ name: 'BetterImageSelect' })
+const props = defineProps<{ modelValue?: string; textures?: Record<string, { name: string; image: HTMLImageElement }> }>()
+const emit = defineEmits<{ 'update:modelValue': [v: string] }>()
 
-  export default {
-    name: "BetterImageSelect",
-    components: {ImageSelectThumb},
-    props: ['modelValue', 'textures'],
-    data() {
-      return {
-        over: false,
-        paneVisible: false
-      }
-    },
-    mounted() {
+const paneVisible = ref(false)
 
-    },
-    computed: {
-      thumbSrc() {
-        if (this.modelValue && this.textures) {
-          const imageDef = this.textures[this.modelValue];
-          if (!imageDef) {
-            return null;
-          }
-          return imageDef.image.src;
-        }
-        return null;
-      }
-    },
-    watch: {},
-    methods: {
-      init(currentTexture, textures) {
-      },
-      onShowSelection(e) {
-        this.paneVisible = true;
-        document.addEventListener('click', this.onDocumentClicked);
-      },
-      onImageSelected(image) {
-        this.$emit('update:modelValue', image.data.name);
-        this.closePane();
-      },
-      onDocumentClicked() {
-        this.closePane();
-      },
-      closePane() {
-        this.paneVisible = false;
-        document.removeEventListener('click', this.onDocumentClicked);
-      }
-    }
+const thumbSrc = computed(() => {
+  if (props.modelValue && props.textures) {
+    const imageDef = props.textures[props.modelValue]
+    if (!imageDef?.image) return null
+    return imageDef.image.src ?? null
   }
+  return null
+})
+
+function onShowSelection() {
+  paneVisible.value = true
+  document.addEventListener('click', onDocumentClicked)
+}
+
+function onImageSelected(image: any) {
+  emit('update:modelValue', image.data.name)
+  closePane()
+}
+
+function onDocumentClicked() {
+  closePane()
+}
+
+function closePane() {
+  paneVisible.value = false
+  document.removeEventListener('click', onDocumentClicked)
+}
 </script>
 
 <style lang="scss" scoped>

@@ -30,61 +30,57 @@
   </div>
 </template>
 
-<script>
-  import SelectValue from "./values/SelectValue.vue";
+<script setup lang="ts">
+import { ref, getCurrentInstance } from 'vue'
+import SelectValue from './values/SelectValue.vue'
+import { EVENT_SEQUENCE_PRESET_SELECTED, EVENT_EMITTER_PRESET_SELECTED } from '../events'
 
-  import {EVENT_SEQUENCE_PRESET_SELECTED, EVENT_EMITTER_PRESET_SELECTED} from "../events";
-  export default {
-    name: "CanvasOptions",
-    components: {SelectValue},
-    data() {
-      return {
-        color: '#333333',
-        gizmos: true,
-        container: 0,
-        popupContainerVisible: false,
-        blendMode: 0,
-        tempBlendMode: 0,
-        tempContainer: 0,
-        blendModes: [
-          {value: 0, name: 'Normal'},
-          {value: 1, name: 'Add'},
-          {value: 2, name: 'Multiply'},
-          {value: 3, name: 'Screen'}
-        ]
-      }
-    },
+defineOptions({ name: 'CanvasOptions' })
 
-    methods: {
-      onShowPopupContainer() {
-        this.tempContainer = this.container;
-        this.tempBlendMode = this.blendMode;
-      },
-      onApplyContainer() {
-        this.container = this.tempContainer;
-        this.blendMode = this.tempBlendMode;
-        this.$editor.setContainer(this.container, this.container == 0 ? 0 : this.blendMode);
-        this.popupContainerVisible = false;
-      },
-      onGizmo(value) {
-        this.$editor.layers.gizmoLayer.visible = value;
-      },
-      onColor(color) {
-        this.$editor.layers.setBackgroundColor(parseInt(color.replace('#', ''), 16));
-      },
-      onChangeContainer(value) {
+const instance = getCurrentInstance()
+const editor = () => instance?.appContext.config.globalProperties.$editor
+const eventBus = instance?.appContext.config.globalProperties.$eventBus
+const fx = () => instance?.appContext.config.globalProperties.$fx
 
-      },
-      onReset() {
-        this.$fx.stopAllEffects();
+const color = ref('#333333')
+const gizmos = ref(true)
+const container = ref(0)
+const popupContainerVisible = ref(false)
+const blendMode = ref(0)
+const tempBlendMode = ref(0)
+const tempContainer = ref(0)
+const blendModes = [
+  { value: 0, name: 'Normal' },
+  { value: 1, name: 'Add' },
+  { value: 2, name: 'Multiply' },
+  { value: 3, name: 'Screen' },
+]
 
-        this.$eventBus.$emit(EVENT_EMITTER_PRESET_SELECTED, null);
-        this.$eventBus.$emit(EVENT_SEQUENCE_PRESET_SELECTED, null);
+function onShowPopupContainer() {
+  tempContainer.value = container.value
+  tempBlendMode.value = blendMode.value
+}
 
-      }
+function onApplyContainer() {
+  container.value = tempContainer.value
+  blendMode.value = tempBlendMode.value
+  editor()?.setContainer(container.value, container.value === 0 ? 0 : blendMode.value)
+  popupContainerVisible.value = false
+}
 
-    }
-  }
+function onGizmo(value: boolean) {
+  if (editor()?.layers?.gizmoLayer) editor().layers.gizmoLayer.visible = value
+}
+
+function onColor(c: string) {
+  editor()?.layers?.setBackgroundColor(parseInt(c.replace('#', ''), 16))
+}
+
+function onReset() {
+  fx()?.stopAllEffects()
+  eventBus?.$emit(EVENT_EMITTER_PRESET_SELECTED, null)
+  eventBus?.$emit(EVENT_SEQUENCE_PRESET_SELECTED, null)
+}
 </script>
 
 <style scoped>

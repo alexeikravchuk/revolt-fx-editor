@@ -11,40 +11,31 @@
   </div>
 </template>
 
-<script>
-import { ElMessage } from 'element-plus'
+<script setup lang="ts">
+import { ref, getCurrentInstance } from 'vue'
+import { useStore } from 'vuex'
 
-export default {
-    name: "SaveBundle",
-    props: [],
-    methods: {
+defineOptions({ name: 'SaveBundle' })
 
-      show() {
-        this.visible = true
-        this.name = this.$store.state.bundle.name
-        if (this.$refs.preview) this.$refs.preview.src = '/foo.png'
-      },
+const store = useStore()
+const instance = getCurrentInstance()
+const editor = () => instance?.appContext.config.globalProperties.$editor
 
-      save() {
-        this.$editor.saveBundleLocal(this.name, this.includeSpritesheet);
-        this.visible = false;
-      },
+const visible = ref(false)
+const includeSpritesheet = ref(true)
+const name = ref('')
 
-      showAlert(message) {
-        ElMessage.error(message)
-      }
-    },
+function show() {
+  visible.value = true
+  name.value = store.state.bundle.name
+}
 
-    data() {
-      return {
-        visible: false,
-        includeSpritesheet: true,
-        name: ''
-      }
-    }
-  }
+function save() {
+  editor()?.saveBundleLocal(name.value, includeSpritesheet.value)
+  visible.value = false
+}
 
-
+defineExpose({ show })
 </script>
 
 <style lang="scss" scoped>

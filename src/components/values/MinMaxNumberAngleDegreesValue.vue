@@ -1,44 +1,48 @@
 <template>
   <div style="margin-bottom: 10px">
-    <b>{{label}}<br></b>
+    <b>{{ label }}<br></b>
     <el-row type="flex" style="margin-top: -4px">
       <el-col>
         <div class="label">Min</div>
-        <angle-degree-value class="input" :min="lowerLimit" :max="upperLimit" controls-position="right" size="small" v-model="minValue" :step="step" @input="$emit('update:min', minValue)"/>
+        <angle-degree-value class="input" :lower-limit="lowerLimit" :upper-limit="upperLimit" :step="step" :model-value="minValue" @update:model-value="onMinChange"/>
       </el-col>
       <el-col>
         <div class="label">Max</div>
-        <angle-degree-value class="input" :min="lowerLimit" :max="upperLimit" controls-position="right" size="small" v-model="maxValue" :step="step" @input="$emit('update:max', maxValue)"/>
+        <angle-degree-value class="input" :lower-limit="lowerLimit" :upper-limit="upperLimit" :step="step" :model-value="maxValue" @update:model-value="onMaxChange"/>
       </el-col>
     </el-row>
   </div>
 </template>
 
-<script>
-  import AngleDegreeValue from "./AngleDegreeValue.vue";
-  export default {
-    name: "MinMaxNumberAngleDegreesValue",
-    components: {AngleDegreeValue},
-    props: ['min', 'max', 'label', 'step', 'lowerLimit', 'upperLimit'],
-    mounted() {
-      this.minValue = this.min;
-      this.maxValue = this.max;
-    },
-    watch:{
-      min() {
-        this.minValue = this.min;
-      },
-      max() {
-        this.maxValue = this.max;
-      }
-    },
-    data() {
-      return {
-        minValue: 0,
-        maxValue: 0
-      }
-    }
-  }
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+import AngleDegreeValue from './AngleDegreeValue.vue'
+
+defineOptions({ name: 'MinMaxNumberAngleDegreesValue' })
+const props = defineProps<{
+  min?: number
+  max?: number
+  label?: string
+  step?: number
+  lowerLimit?: number
+  upperLimit?: number
+}>()
+const emit = defineEmits<{ 'update:min': [v: number]; 'update:max': [v: number] }>()
+
+const minValue = ref(props.min ?? 0)
+const maxValue = ref(props.max ?? 0)
+
+watch(() => props.min, (v) => { minValue.value = v ?? 0 })
+watch(() => props.max, (v) => { maxValue.value = v ?? 0 })
+
+function onMinChange(v: number) {
+  minValue.value = v
+  emit('update:min', v)
+}
+function onMaxChange(v: number) {
+  maxValue.value = v
+  emit('update:max', v)
+}
 </script>
 
 <style scoped>

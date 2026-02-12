@@ -2,11 +2,9 @@
   <div><span class="label">{{label}}</span></div>
 </template>
 
-<script>
-  export default {
-    name: "ValueDelimiter",
-    props: ['label']
-  }
+<script setup lang="ts">
+defineOptions({ name: 'ValueDelimiter' })
+defineProps<{ label?: string }>()
 </script>
 
 <style lang="scss" scoped>

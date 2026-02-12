@@ -5,11 +5,9 @@
   </div>
 </template>
 
-<script>
-  export default {
-    name: "ValueElement",
-    props: ['label']
-  }
+<script setup lang="ts">
+defineOptions({ name: 'ValueElement' })
+defineProps<{ label?: string }>()
 </script>
 
 <style scoped>

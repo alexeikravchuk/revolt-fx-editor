@@ -1,42 +1,40 @@
 <template>
   <div style="margin-bottom: 10px">
-    <b>{{label}}<br></b>
+    <b>{{ label }}<br></b>
     <el-row type="flex" style="margin-top: -4px">
       <el-col>
         <div class="label">{{ minLabel || 'Min' }}</div>
-        <el-input-number class="input" :min="lowerLimit" :max="upperLimit" controls-position="right" size="small" v-model="minValue" :step="step" @change="$emit('update:min', minValue)"/>
+        <el-input-number class="input" :min="lowerLimit" :max="upperLimit" controls-position="right" size="small" v-model="minValue" :step="step" @change="emit('update:min', minValue)"/>
       </el-col>
       <el-col>
         <div class="label">{{ maxLabel || 'Max' }}</div>
-        <el-input-number class="input" :min="lowerLimit" :max="upperLimit" controls-position="right" size="small" v-model="maxValue" :step="step" @change="$emit('update:max', maxValue)"/>
+        <el-input-number class="input" :min="lowerLimit" :max="upperLimit" controls-position="right" size="small" v-model="maxValue" :step="step" @change="emit('update:max', maxValue)"/>
       </el-col>
     </el-row>
   </div>
 </template>
 
-<script>
-  export default {
-    name: "MinMaxNumberValue",
-    props: ['min', 'max', 'label', 'step', 'lowerLimit', 'upperLimit', 'minLabel', 'maxLabel'],
-    mounted() {
-      this.minValue = this.min;
-      this.maxValue = this.max;
-    },
-    watch:{
-      min() {
-        this.minValue = this.min;
-      },
-      max() {
-        this.maxValue = this.max;
-      }
-    },
-    data() {
-      return {
-        minValue: 0,
-        maxValue: 0
-      }
-    }
-  }
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+
+defineOptions({ name: 'MinMaxNumberValue' })
+const props = defineProps<{
+  min?: number
+  max?: number
+  label?: string
+  step?: number
+  lowerLimit?: number
+  upperLimit?: number
+  minLabel?: string
+  maxLabel?: string
+}>()
+const emit = defineEmits<{ 'update:min': [v: number]; 'update:max': [v: number] }>()
+
+const minValue = ref(props.min ?? 0)
+const maxValue = ref(props.max ?? 0)
+
+watch(() => props.min, (v) => { minValue.value = v ?? 0 })
+watch(() => props.max, (v) => { maxValue.value = v ?? 0 })
 </script>
 
 <style scoped>

@@ -7,7 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      url: fileURLToPath(new URL('./src/lib/url-browser.js', import.meta.url)),
+      url: fileURLToPath(new URL('./src/lib/url-browser.ts', import.meta.url)),
     },
   },
   base: './',

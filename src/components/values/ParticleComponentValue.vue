@@ -1,84 +1,67 @@
 <template>
-
   <div>
     <value-element label="Component">
-      <div v-if="type==0">
-        <better-image-select v-model="spriteValue" :textures="$editor.spritesheetImagesMap" @update:modelValue="onSelect"/>
+      <div v-if="type===0">
+        <better-image-select v-model="spriteValue" :textures="spriteTextures" @update:modelValue="onSelect"/>
       </div>
-      <div v-if="type==1">
-        <better-image-select v-model="movieClipValue" :textures="$editor.moveClipImagesMap" @update:modelValue="onSelect"/>
+      <div v-if="type===1">
+        <better-image-select v-model="movieClipValue" :textures="movieClipTextures" @update:modelValue="onSelect"/>
       </div>
     </value-element>
   </div>
 </template>
 
-<script>
-  import BetterImageSelect from "../imageselect/BetterImageSelect.vue";
-  import ValueElement from "./ValueElement.vue";
+<script setup lang="ts">
+import { ref, computed, watch, onMounted, getCurrentInstance } from 'vue'
+import BetterImageSelect from '../imageselect/BetterImageSelect.vue'
+import ValueElement from './ValueElement.vue'
 
-  export default {
-    name: "ParticleComponentValue",
-    components: {ValueElement, BetterImageSelect},
-    props: ['modelValue', 'type'],
-    emits: ['update:modelValue'],
-    mounted() {
-      this.setRightValue(this.type, this.modelValue);
-    },
-    computed: {},
-    data() {
-      return {
-        spriteValue: null,
-        movieClipValue: null
-      }
-    },
-    watch: {
-      'type': {
-        handler(newVal) {
-          this.setRightValue(newVal, this.modelValue);
-        }
-      },
-      'modelValue': {
-        handler(newVal) {
-          this.setRightValue(this.type, newVal);
-        }
-      }
+defineOptions({ name: 'ParticleComponentValue' })
+const props = defineProps<{ modelValue?: string; type?: number }>()
+const emit = defineEmits<{ 'update:modelValue': [v: string] }>()
+
+const instance = getCurrentInstance()
+const editor = () => instance?.appContext.config.globalProperties.$editor
+
+const spriteValue = ref<string | null>(null)
+const movieClipValue = ref<string | null>(null)
+
+const spriteTextures = computed(() => editor()?.spritesheetImagesMap ?? {})
+const movieClipTextures = computed(() => editor()?.moveClipImagesMap ?? {})
+
+function setRightValue(type: number, value: string) {
+  const ed = editor()
+  if (!ed) return
+
+  if (type === 0) {
+    if (ed.spritesheetImagesMap[value] == null) {
+      const fallback = ed.defaultSprite?.name ?? ed.spritesheetImagesList?.[0]?.name ?? ''
+      spriteValue.value = fallback
+      emit('update:modelValue', spriteValue.value)
+    } else {
+      spriteValue.value = value
     }
-    ,
-    methods: {
-      setRightValue(type, value) {
-        switch (type) {
-          case 0:
-            if (this.$editor.spritesheetImagesMap[value] == null) {
-              this.spriteValue = this.$editor.defaultSprite.name;
-              this.$emit('update:modelValue', this.spriteValue);
-            } else {
-              this.spriteValue = value;
-            }
-            break;
-          case 1:
-            if (this.$editor.moveClipImagesMap[value] == null) {
-              this.movieClipValue = this.$editor.defaultMovieClip.name;
-              this.$emit('update:modelValue', this.movieClipValue);
-            } else {
-              this.movieClipValue = value;
-            }
-            break;
-        }
-      },
-      onSelect(e) {
-        let value;
-        switch (this.type) {
-          case 0:
-            value = this.spriteValue;
-            break;
-          case 1:
-            value = this.movieClipValue;
-            break;
-        }
-        this.$emit('update:modelValue', value);
-      }
+  } else if (type === 1) {
+    if (ed.moveClipImagesMap[value] == null) {
+      const fallback = ed.defaultMovieClip?.name ?? ed.moveClipImagesList?.[0]?.name ?? ''
+      movieClipValue.value = fallback
+      emit('update:modelValue', movieClipValue.value)
+    } else {
+      movieClipValue.value = value
     }
   }
+}
+
+function onSelect() {
+  const value = props.type === 0 ? spriteValue.value : movieClipValue.value
+  if (value != null) emit('update:modelValue', value)
+}
+
+onMounted(() => setRightValue(props.type ?? 0, props.modelValue ?? ''))
+
+watch(() => props.type, (newVal) => setRightValue(newVal ?? 0, props.modelValue ?? ''))
+
+watch(() => props.modelValue, (newVal) => setRightValue(props.type ?? 0, newVal ?? ''))
 </script>
 
 <style scoped>

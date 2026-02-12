@@ -2,29 +2,23 @@
   <div class="thumb" :style="{width: _width, height: _height}" layout="row center-center" @click.stop="handleClick">
     <img :src="src"/>
 
-    <span>{{name}}</span>
+    <span>{{ name }}</span>
   </div>
 </template>
 
-<script>
-  export default {
-    name: "ImageSelectThumb",
-    props: ['width', 'height', 'src', 'data', 'name'],
-    computed: {
-      _width() {
-        return this.width || '100%';
-      },
-      _height() {
-        return this.height || '100%';
-      }
-    },
-    methods: {
-      handleClick(e) {
-        this.$emit('select', this);
-      }
-    }
+<script setup lang="ts">
+import { computed } from 'vue'
 
-  }
+defineOptions({ name: 'ImageSelectThumb' })
+const props = defineProps<{ width?: string; height?: string; src?: string; data?: any; name?: string }>()
+const emit = defineEmits<{ select: [payload: any] }>()
+
+const _width = computed(() => props.width || '100%')
+const _height = computed(() => props.height || '100%')
+
+function handleClick() {
+  emit('select', { data: props.data, name: props.name })
+}
 </script>
 
 <style lang="scss" scoped>

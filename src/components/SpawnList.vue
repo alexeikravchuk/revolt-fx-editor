@@ -21,19 +21,19 @@
       <p>
         <el-select v-if="type==0" v-model="emitterId">
           <el-option
-            v-for="option in emitters" :key="option.id"
-            v-if="option.type == 0 && (exclude && option.id != exclude.id)"
-            :value="option.id"
-            :label="getEmitterName(option)"
+            v-for="item in emitterOptions"
+            :key="item.id"
+            :value="item.id"
+            :label="getEmitterName(item)"
           />
         </el-select>
 
         <el-select v-if="type==1" v-model="sequenceId">
           <el-option
-            v-for="option in sequences" :key="option.id"
-            v-if="option.type == 1 && (exclude && option.id != exclude.id)"
-            :value="option.id"
-            :label="getSequenceName(option)"
+            v-for="item in sequenceOptions"
+            :key="item.id"
+            :value="item.id"
+            :label="getSequenceName(item)"
           />
         </el-select>
       </p>
@@ -80,120 +80,132 @@
   </div>
 </template>
 
-<script>
-  import List from "./list/List.vue";
-  import NumberValue from "./values/NumberValue.vue";
-  import Help from "./Help.vue";
-  import ValueElement from "./values/ValueElement.vue";
-  import * as _ from 'lodash';
+<script setup lang="ts">
+defineOptions({ name: 'SpawnList' })
 
-  export default {
-    name: "SpawnList",
-    components: {ValueElement, Help, NumberValue, List},
-    props: ['elements', 'exclude'],
-    data() {
-      return {
-        modalVisible: false,
-        editModalVisible: false,
-        type: 0,
-        scale: 1,
-        adoptRotation: true,
-        emitterId: null,
-        sequenceId: null,
-        containerId: '',
-        editData: null
-      }
-    },
-    computed: {
-      emitters() {
-        return _.sortBy(this.$store.state.bundle.emitters.slice(), 'name');
-      },
-      sequences() {
-        return _.sortBy(this.$store.state.bundle.sequences.slice(), 'name');
-      },
-      isDisabled() {
-        return (this.type == 0 && this.emitterId == null) || (this.type == 1 && this.sequenceId == null);
-      }
+import { ref, computed, getCurrentInstance } from 'vue'
+import { useStore } from 'vuex'
+import List from './list/List.vue'
+import Help from './Help.vue'
+import ValueElement from './values/ValueElement.vue'
+import * as _ from 'lodash'
 
-    },
-    methods: {
+const props = defineProps<{
+  elements: any[]
+  exclude?: any
+}>()
 
-      getName(data) {
-        if (data == null) return '';
-        if (data.type == 0) {
-          return this.getEmitterName(data);
-        }
-        return this.getSequenceName(data);
-      },
+const emit = defineEmits<{
+  add: [data: any]
+  remove: [data: any]
+}>()
 
-      getEmitterName(obj) {
-        const d = this.$editor.getEmitterById(obj.id);
-        if (!d) return;
-        return `[E] ${d.name}`;
-      },
-      getSequenceName(obj) {
-        const d = this.$editor.getSequenceById(obj.id);
-        if (!d) return;
-        return `[S] ${d.name}`;
-      },
-      onAdd() {
-        this.modalVisible = true;
-      },
+const store = useStore()
+const instance = getCurrentInstance()
+const editor = () => instance?.appContext.config.globalProperties.$editor
 
-      onRemove(data) {
-        this.$emit('remove', data.data);
-      },
+const modalVisible = ref(false)
+const editModalVisible = ref(false)
+const type = ref(0)
+const scale = ref(1)
+const adoptRotation = ref(true)
+const emitterId = ref<number | null>(null)
+const sequenceId = ref<number | null>(null)
+const containerId = ref('')
+const editData = ref<any>(null)
 
-      onSelect(entry) {
-        this.scale = entry.data.scale;
-        this.containerId = entry.data.containerId;
-        this.editData = entry.data;
-        this.editModalVisible = true;
-        this.adoptRotation = entry.data.adoptRotation;
-      },
+const emitters = computed(() => {
+  return _.sortBy(store.state.bundle.emitters.slice(), 'name')
+})
 
-      applyChanges() {
-        this.editData.scale = this.scale;
-        this.editData.containerId = this.containerId;
-        this.editModalVisible = false;
-        this.editData.adoptRotation = this.adoptRotation;
-      },
+const sequences = computed(() => {
+  return _.sortBy(store.state.bundle.sequences.slice(), 'name')
+})
 
-      ok() {
-        this.modalVisible = false;
+const emitterOptions = computed(() => {
+  const ex = props.exclude
+  return emitters.value.filter((item: any) => item.type === 0 && (!ex || item.id !== ex.id))
+})
 
-        let data;
-        switch (this.type) {
-          case 0:
-            const e = this.$editor.getEmitterById(this.emitterId);
-            data = {
-              type: 0,
-              id: e.id,
-              scale: this.scale,
-              adoptRotation: this.adoptRotation,
-              containerId: this.containerId
-            };
-            break;
+const sequenceOptions = computed(() => {
+  const ex = props.exclude
+  return sequences.value.filter((item: any) => item.type === 1 && (!ex || item.id !== ex.id))
+})
 
-          case 1:
-            const s = this.$editor.getSequenceById(this.sequenceId);
-            data = {
-              type: 1,
-              id: s.id,
-              adoptRotation: this.adoptRotation,
-              scale: this.scale
-            };
-            break;
+const isDisabled = computed(() => {
+  return (type.value === 0 && emitterId.value == null) || (type.value === 1 && sequenceId.value == null)
+})
 
-        }
+function getName(data: any) {
+  if (data == null) return ''
+  if (data.type === 0) return getEmitterName(data)
+  return getSequenceName(data)
+}
 
-        this.$emit('add', data);
-      }
+function getEmitterName(obj: any) {
+  const d = editor()?.getEmitterById(obj.id)
+  if (!d) return ''
+  return `[E] ${d.name}`
+}
 
+function getSequenceName(obj: any) {
+  const d = editor()?.getSequenceById(obj.id)
+  if (!d) return ''
+  return `[S] ${d.name}`
+}
+
+function onAdd() {
+  modalVisible.value = true
+}
+
+function onRemove(data: any) {
+  emit('remove', data.data)
+}
+
+function onSelect(entry: any) {
+  scale.value = entry.data.scale
+  containerId.value = entry.data.containerId
+  editData.value = entry.data
+  editModalVisible.value = true
+  adoptRotation.value = entry.data.adoptRotation
+}
+
+function applyChanges() {
+  if (!editData.value) return
+  editData.value.scale = scale.value
+  editData.value.containerId = containerId.value
+  editData.value.adoptRotation = adoptRotation.value
+  editModalVisible.value = false
+}
+
+function ok() {
+  modalVisible.value = false
+  const ed = editor()
+  if (!ed) return
+
+  let data: any
+  if (type.value === 0) {
+    const e = ed.getEmitterById(emitterId.value!)
+    if (!e) return
+    data = {
+      type: 0,
+      id: e.id,
+      scale: scale.value,
+      adoptRotation: adoptRotation.value,
+      containerId: containerId.value,
     }
-
-
+  } else {
+    const s = ed.getSequenceById(sequenceId.value!)
+    if (!s) return
+    data = {
+      type: 1,
+      id: s.id,
+      adoptRotation: adoptRotation.value,
+      scale: scale.value,
+    }
   }
+  emit('add', data)
+}
 </script>
 
 <style scoped>

@@ -19,28 +19,28 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, onMounted, inject, getCurrentInstance } from 'vue'
 import RenderCanvas from './components/RenderCanvas.vue'
 import TopMenu from './components/TopMenu.vue'
 import SidePanel from './components/SidePanel.vue'
-import { Editor } from './editor/editor.js'
+import { Editor } from './editor/editor'
 
-export default {
-  name: 'App',
-  components: { SidePanel, TopMenu, RenderCanvas },
-  inject: ['vueApp'],
-  data() {
-    return { blocker: true }
-  },
-  mounted() {
-    this.$eventBus.$once('canvasReady', async (app) => {
-      const editor = new Editor(app, this)
-      this.vueApp.config.globalProperties.$editor = editor
-      await editor.loadDefaultBundle()
-      this.blocker = false
-    })
-  },
-}
+const blocker = ref(true)
+const vueApp = inject<any>('vueApp')
+const instance = getCurrentInstance()
+const eventBus = instance?.appContext.config.globalProperties.$eventBus
+
+onMounted(() => {
+  eventBus?.$once('canvasReady', async (app: any) => {
+    const editor = new Editor(app, instance?.proxy)
+    if (vueApp) {
+      vueApp.config.globalProperties.$editor = editor
+    }
+    await editor.loadDefaultBundle()
+    blocker.value = false
+  })
+})
 </script>
 
 <style>

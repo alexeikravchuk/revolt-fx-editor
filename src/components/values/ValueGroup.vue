@@ -5,11 +5,9 @@
   </div>
 </template>
 
-<script>
-  export default {
-    name: "ValueGroup",
-    props:['label', 'sub']
-  }
+<script setup lang="ts">
+defineOptions({ name: 'ValueGroup' })
+defineProps<{ label?: string; sub?: boolean }>()
 </script>
 
 <style lang="scss" scoped>

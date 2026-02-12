@@ -5,7 +5,7 @@
 
       <help text="Add a spritesheet PNG and JSON file">
         <div class="choose-file">
-          <span>{{infoText}}</span>
+          <span>{{ infoText }}</span>
           <input type="file" multiple @change="handleFiles"/>
         </div>
       </help>
@@ -14,7 +14,7 @@
         <el-button @click="visible = false">Cancel</el-button>
         <el-button :disabled="!createOk" type="primary" @click="create">Create</el-button>
       </template>
-      <img src="/foo.png" ref="preview" class="spritesheet-preview"/>
+      <img :src="previewSrc" ref="previewRef" class="spritesheet-preview"/>
       <help text="Add only textures containing this string in their names as FX assets">
         <el-input v-model="spritesheetFilter" placeholder="Texture Filter" style="width:50%;" @change="checkFilter"></el-input>
       </help>
@@ -23,158 +23,132 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, computed, getCurrentInstance } from 'vue'
+import { useStore } from 'vuex'
+import { ElNotification } from 'element-plus'
+import { INIT_BUNDLE } from '../store'
+import { EVENT_EMITTER_PRESET_SELECTED, EVENT_RESET } from '../events'
+import Help from './Help.vue'
 
-  import {INIT_BUNDLE} from "../store";
-  import {EVENT_EMITTER_PRESET_SELECTED, EVENT_RESET} from "../events";
-  import Help from "./Help.vue";
+defineOptions({ name: 'NewBundle' })
 
+const store = useStore()
+const instance = getCurrentInstance()
+const eventBus = instance?.appContext.config.globalProperties.$eventBus
+const editor = () => instance?.appContext.config.globalProperties.$editor
+const loading = () => instance?.appContext.config.globalProperties.$loading
 
-  let jsonFile;
-  let imageFile;
+const visible = ref(false)
+const name = ref('')
+const infoText = ref('Click to add spritesheet assets...')
+const spritesheetFilter = ref('')
+const filterError = ref(false)
+const tempImage = ref<string | null>(null)
+const tempJson = ref<any>(null)
+const previewSrc = ref('/foo.png')
 
-  const infoText = 'Click to add spritesheet assets...';
+let jsonFile: File | null = null
+let imageFile: File | null = null
 
-  export default {
-    name: "NewBundle",
-    components: {Help},
-    props: [],
-    computed: {
-      createOk() {
-        return !this.filterError && this.tempJson && this.tempImage;
-      }
-    },
-    methods: {
+const createOk = computed(() => !filterError.value && tempJson.value && tempImage.value)
 
-      show() {
-        this.visible = true;
-        this.name = this.spritesheetFilter = this.mcFilter = '';
-        this.infoText = infoText;
+function show() {
+  visible.value = true
+  name.value = ''
+  spritesheetFilter.value = ''
+  infoText.value = 'Click to add spritesheet assets...'
+  filterError.value = false
+  tempImage.value = null
+  tempJson.value = null
+  jsonFile = null
+  imageFile = null
+  previewSrc.value = '/foo.png'
+}
 
-        this.filterError = false;
+async function handleFiles(e: Event) {
+  try {
+    const files = (e.target as HTMLInputElement).files
+    const err = 'Please provide a spritesheet PNG image and a JSON file.'
 
-        this.tempImage = null;
-        this.tempJson = null;
-        jsonFile = null;
-        imageFile = null;
-        if (this.$refs.preview) this.$refs.preview.src = '/static/foo.png';
-      },
+    if (!files || files.length !== 2) {
+      showAlert(err)
+      return
+    }
+    imageFile = findType(files, 'image/png')
+    jsonFile = findType(files, 'application/json')
 
-      async handleFiles(e) {
-        try {
-          const files = e.target.files;
-          let err = 'Please provide a spritesheet PNG image and a JSON file.';
+    if (jsonFile == null || imageFile == null) {
+      showAlert(err)
+      return
+    }
 
-          if (files.length != 2) {
-            this.showAlert(err);
-            return;
-          }
-          imageFile = this.findType(files, 'image/png');
-          jsonFile = this.findType(files, 'application/json');
+    eventBus?.$emit(EVENT_RESET)
 
-          if (jsonFile == null || imageFile == null) {
-            this.showAlert(err);
-            return;
-          }
+    const data = await editor()?.loadSpritesheetLocal(jsonFile, imageFile)
+    if (!data || !data.json.frames) {
+      showAlert('Please provide a valid spritesheet JSON file.')
+      return
+    }
 
-          this.$eventBus.$emit(EVENT_RESET);
+    tempJson.value = data.json
+    tempImage.value = data.image
+    previewSrc.value = data.image
+    checkFilter()
+    infoText.value = `${imageFile.name}, ${jsonFile.name}`
+    ;(e.target as HTMLInputElement).value = ''
+  } catch (err) {
+    showAlert('Something went wrong!')
+    console.log(err)
+  }
+}
 
-          const data = await this.$editor.loadSpritesheetLocal(jsonFile, imageFile);
+async function create() {
+  checkFilter()
+  if (filterError.value || !tempJson.value || !tempImage.value) return
 
-          if (!data.json.frames) {
-            this.showAlert('Please provide a valid spritesheet JSON file.');
-            return;
-          }
+  const loader = loading()?.({ fullscreen: true, background: 'white', text: 'RevoltFX' })
+  store.commit(INIT_BUNDLE, { name: name.value || 'New Bundle', spritesheetFilter: spritesheetFilter.value })
+  eventBus?.$emit(EVENT_RESET)
 
-          this.tempJson = data.json;
-          this.tempImage = data.image;
-          this.$refs.preview.src = data.image;
+  await editor()?.createSpritesheet(tempImage.value, tempJson.value, spritesheetFilter.value)
 
-          this.checkFilter();
+  if (imageFile && jsonFile) {
+    store.state.spritesheet.imageName = imageFile.name
+    store.state.spritesheet.jsonName = jsonFile.name
+  }
+  visible.value = false
+  eventBus?.$emit(EVENT_EMITTER_PRESET_SELECTED, null)
+  loader?.close()
+}
 
-          this.infoText = `${imageFile.name}, ${jsonFile.name}`;
+function findType(files: FileList, type: string): File | null {
+  for (let i = 0; i < files.length; i++) {
+    if (files[i].type === type) return files[i]
+  }
+  return null
+}
 
-          e.target.value = '';
+function showAlert(message: string) {
+  ElNotification.error({ title: 'Oops', message })
+}
 
-
-        } catch (e) {
-          this.showAlert('Something went wrong!');
-          console.log(e);
-        }
-      },
-
-      async create() {
-
-        this.checkFilter();
-
-        if (this.filterError) {
-          return;
-        }
-
-        const loader = this.$loading({fullscreen: true, background: 'white', text: 'RevoltFX'});
-        this.$store.commit(INIT_BUNDLE,
-          {
-            name: this.name || 'New Bundle',
-            spritesheetFilter: this.spritesheetFilter
-          });
-
-        this.$eventBus.$emit(EVENT_RESET);
-
-        await this.$editor.createSpritesheet(this.tempImage, this.tempJson, this.spritesheetFilter);
-
-        this.$store.state.spritesheet.imageName = imageFile.name;
-        this.$store.state.spritesheet.jsonName = jsonFile.name;
-        this.visible = false;
-        this.$eventBus.$emit(EVENT_EMITTER_PRESET_SELECTED, null);
-        loader.close();
-      },
-      findType(files, type) {
-        for (let i = 0; i < files.length; i++) {
-          if (files[i].type == type) {
-            return files[i];
-          }
-        }
-        return null;
-      },
-
-      showAlert(message) {
-        this.$notify.error({
-          title: 'Oops',
-          message: message
-        });
-      },
-      checkFilter() {
-        if (this.tempJson != null && this.spritesheetFilter != '') {
-          const filter = this.spritesheetFilter;
-          let ok = false;
-          for (let i in this.tempJson.frames) {
-            if (i.indexOf(filter) != -1) {
-              ok = true;
-              break;
-            }
-          }
-          this.filterError = !ok;
-        } else {
-          this.filterError = false;
-        }
-      }
-    },
-
-    data() {
-      return {
-        visible: false,
-        name: '',
-        infoText: null,
-        spritesheetFilter: null,
-        mcFilter: null,
-        filterError: false,
-        tempImage: null,
-        tempJson: null
+function checkFilter() {
+  if (tempJson.value != null && spritesheetFilter.value !== '') {
+    let ok = false
+    for (const i in tempJson.value.frames) {
+      if (i.indexOf(spritesheetFilter.value) !== -1) {
+        ok = true
+        break
       }
     }
+    filterError.value = !ok
+  } else {
+    filterError.value = false
   }
+}
 
-
+defineExpose({ show })
 </script>
 
 <style lang="scss" scoped>
@@ -200,7 +174,6 @@
 
   .choose-file input[type="file"] {
     position: absolute;
-    background-color: brown;
     width: 100%;
     height: $height;
     top: 0;
@@ -215,5 +188,4 @@
     background-color: #dddddd;
     margin-top: 10px;
   }
-
 </style>

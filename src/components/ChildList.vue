@@ -17,10 +17,10 @@
         Particle Emitter<br>
         <el-select v-model="emitterId">
           <el-option
-            v-for="option in emitters" :key="option.id"
-            v-if="exclude && option.id != exclude.id"
-            :value="option.id"
-            :label="getName(option)"
+            v-for="item in emitterOptions"
+            :key="item.id"
+            :value="item.id"
+            :label="getName(item)"
           />
         </el-select>
       </p>
@@ -75,82 +75,84 @@
   </div>
 </template>
 
-<script>
-  import List from "./list/List.vue";
-  import NumberValue from "./values/NumberValue.vue";
-  import Help from "./Help.vue";
-  import ValueElement from "./values/ValueElement.vue";
-  import * as _ from 'lodash';
+<script setup lang="ts">
+defineOptions({ name: 'ChildList' })
 
-  export default {
-    name: "ChildList",
-    components: {ValueElement, Help, NumberValue, List},
-    props: ['elements', 'exclude'],
-    data() {
-      return {
-        modalVisible: false,
-        editModalVisible: false,
-        scale: 1,
-        emitterId: null,
-        containerId: '',
-        editData: null,
-        adoptRotation: true
-      }
-    },
-    computed: {
-      emitters() {
-        return _.sortBy(this.$store.state.bundle.emitters.slice(), 'name');
-      },
-      isDisabled() {
-        return this.emitterId == null;
-      }
-    },
-    methods: {
-      getName(obj) {
-        return `[E] ${this.$editor.getEmitterById(obj.id).name}`;
-      },
+import { ref, computed, getCurrentInstance } from 'vue'
+import { useStore } from 'vuex'
+import List from './list/List.vue'
+import Help from './Help.vue'
+import ValueElement from './values/ValueElement.vue'
+import * as _ from 'lodash'
 
-      onAdd() {
-        this.modalVisible = true;
-        this.containerId = '';
-        this.scale = 1;
-        this.adoptRotation = true;
-      },
+const props = defineProps<{ elements?: any[]; exclude?: any }>()
+const emit = defineEmits<{ add: [data: any]; remove: [data: any] }>()
 
-      onRemove(data) {
-        this.$emit('remove', data.data);
-      },
+const store = useStore()
+const instance = getCurrentInstance()
+const editor = () => instance?.appContext.config.globalProperties.$editor
 
-      onSelect(entry) {
-        this.scale = entry.data.scale;
-        this.containerId = entry.data.containerId;
-        this.editData = entry.data;
-        this.editModalVisible = true;
-        this.adoptRotation = entry.data.adoptRotation;
-      },
+const modalVisible = ref(false)
+const editModalVisible = ref(false)
+const scale = ref(1)
+const emitterId = ref<number | null>(null)
+const containerId = ref('')
+const editData = ref<any>(null)
+const adoptRotation = ref(true)
 
-      applyChanges() {
-        this.editData.scale = this.scale;
-        this.editData.containerId = this.containerId;
-        this.editModalVisible = false;
-        this.editData.adoptRotation = this.adoptRotation;
-      },
+const emitters = computed(() => _.sortBy(store.state.bundle.emitters.slice(), 'name'))
 
-      ok() {
-        this.modalVisible = false;
+const emitterOptions = computed(() => {
+  const ex = props.exclude
+  return emitters.value.filter((item: any) => !ex || item.id !== ex.id)
+})
 
-        const e = this.$editor.getEmitterById(this.emitterId);
-        const data = {
-          type: 0,
-          id: e.id,
-          scale: this.scale,
-          containerId: this.containerId,
-          adoptRotation: this.adoptRotation
-        };
-        this.$emit('add', data);
-      }
-    }
-  }
+const isDisabled = computed(() => emitterId.value == null)
+
+function getName(obj: any) {
+  const d = editor()?.getEmitterById(obj.id)
+  return d ? `[E] ${d.name}` : ''
+}
+
+function onAdd() {
+  modalVisible.value = true
+  containerId.value = ''
+  scale.value = 1
+  adoptRotation.value = true
+}
+
+function onRemove(data: any) {
+  emit('remove', data.data)
+}
+
+function onSelect(entry: any) {
+  scale.value = entry.data.scale
+  containerId.value = entry.data.containerId
+  editData.value = entry.data
+  editModalVisible.value = true
+  adoptRotation.value = entry.data.adoptRotation
+}
+
+function applyChanges() {
+  if (!editData.value) return
+  editData.value.scale = scale.value
+  editData.value.containerId = containerId.value
+  editData.value.adoptRotation = adoptRotation.value
+  editModalVisible.value = false
+}
+
+function ok() {
+  modalVisible.value = false
+  const e = editor()?.getEmitterById(emitterId.value!)
+  if (!e) return
+  emit('add', {
+    type: 0,
+    id: e.id,
+    scale: scale.value,
+    containerId: containerId.value,
+    adoptRotation: adoptRotation.value,
+  })
+}
 </script>
 
 <style scoped>

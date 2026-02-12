@@ -25,8 +25,8 @@
             :lower-limit="0.001"
             label="Spawn Frequency"
             :step="0.01"
-            :min.sync="data.spawnFrequencyMin"
-            :max.sync="data.spawnFrequencyMax"
+            v-model:min="data.spawnFrequencyMin"
+            v-model:max="data.spawnFrequencyMax"
           />
         </help>
 
@@ -35,8 +35,8 @@
             :lower-limit="0"
             label="Spawn Count"
             :step="1"
-            :min.sync="data.spawnCountMin"
-            :max.sync="data.spawnCountMax"
+            v-model:min="data.spawnCountMin"
+            v-model:max="data.spawnCountMax"
           />
         </help>
 
@@ -207,15 +207,15 @@
             label="Animation Speed"
             :lower-limit="0"
             :step="0.1"
-            :min.sync="data.particleSettings.componentParams.animationSpeedMin"
-            :max.sync="data.particleSettings.componentParams.animationSpeedMax"
+            v-model:min="data.particleSettings.componentParams.animationSpeedMin"
+            v-model:max="data.particleSettings.componentParams.animationSpeedMax"
           />
         </div>
         <help text="BlendModes won't work with PIXI ParticleContainer">
           <select-value
             label="Blend Mode"
             v-model="data.particleSettings.blendMode"
-            :options="$editor.blendModes"
+            :options="blendModes"
           />
         </help>
 
@@ -227,8 +227,8 @@
             :step="0.1"
             min-label="X"
             max-label="Y"
-            :min.sync="data.particleSettings.componentParams.anchorX"
-            :max.sync="data.particleSettings.componentParams.anchorY"
+            v-model:min="data.particleSettings.componentParams.anchorX"
+            v-model:max="data.particleSettings.componentParams.anchorY"
           />
         </help>
 
@@ -247,8 +247,8 @@
             label="Duration"
             :lower-limit="0"
             :step="0.1"
-            :min.sync="data.particleSettings.durationMin"
-            :max.sync="data.particleSettings.durationMax"
+            v-model:min="data.particleSettings.durationMin"
+            v-model:max="data.particleSettings.durationMax"
           />
         </help>
       </value-group>
@@ -272,8 +272,8 @@
               <min-max-number-value
                 label="Distance"
                 :step="1"
-                :min.sync="data.particleSettings.distanceMin"
-                :max.sync="data.particleSettings.distanceMax"
+                v-model:min="data.particleSettings.distanceMin"
+                v-model:max="data.particleSettings.distanceMax"
               />
             </help>
             <select-value
@@ -288,8 +288,8 @@
               <min-max-number-value
                 label="Move Speed"
                 :step="0.1"
-                :min.sync="data.particleSettings.moveSpeedMin"
-                :max.sync="data.particleSettings.moveSpeedMax"
+                v-model:min="data.particleSettings.moveSpeedMin"
+                v-model:max="data.particleSettings.moveSpeedMax"
               />
             </help>
 
@@ -312,8 +312,8 @@
                   label="Bounce Fac"
                   :lower-limit="0"
                   :step="0.1"
-                  :min.sync="data.particleSettings.bounceFacMin"
-                  :max.sync="data.particleSettings.bounceFacMax"
+                  v-model:min="data.particleSettings.bounceFacMin"
+                  v-model:max="data.particleSettings.bounceFacMax"
                 />
               </help>
 
@@ -325,8 +325,8 @@
                   :lower-limit="0"
                   :upper-limit="1"
                   :step="0.1"
-                  :min.sync="data.particleSettings.frictionMin"
-                  :max.sync="data.particleSettings.frictionMax"
+                  v-model:min="data.particleSettings.frictionMin"
+                  v-model:max="data.particleSettings.frictionMax"
                 />
               </help>
 
@@ -360,8 +360,8 @@
             <min-max-number-angle-degrees-value
               label="Rotation Speed"
               :step="0.1"
-              :min.sync="data.particleSettings.rotationSpeedMin"
-              :max.sync="data.particleSettings.rotationSpeedMax"
+              v-model:min="data.particleSettings.rotationSpeedMin"
+              v-model:max="data.particleSettings.rotationSpeedMax"
             />
           </help>
 
@@ -437,8 +437,8 @@
               :lower-limit="0"
               :upper-limit="1"
               :step="0.1"
-              :min.sync="data.particleSettings.alphaStartMin"
-              :max.sync="data.particleSettings.alphaStartMax"
+              v-model:min="data.particleSettings.alphaStartMin"
+              v-model:max="data.particleSettings.alphaStartMax"
             />
           </help>
           <help text="Particle alpha end value">
@@ -447,8 +447,8 @@
               :lower-limit="0"
               :upper-limit="1"
               :step="0.1"
-              :min.sync="data.particleSettings.alphaEndMin"
-              :max.sync="data.particleSettings.alphaEndMax"
+              v-model:min="data.particleSettings.alphaEndMin"
+              v-model:max="data.particleSettings.alphaEndMax"
             />
           </help>
           <select-value
@@ -515,8 +515,8 @@
                 label="Start X Scale"
                 :lower-limit="0"
                 :step="0.1"
-                :min.sync="data.particleSettings.scaleXStartMin"
-                :max.sync="data.particleSettings.scaleXStartMax"
+                v-model:min="data.particleSettings.scaleXStartMin"
+                v-model:max="data.particleSettings.scaleXStartMax"
               />
             </help>
             <help text="Particle end x scale value">
@@ -524,8 +524,8 @@
                 label="End X Scale"
                 :lower-limit="0"
                 :step="0.1"
-                :min.sync="data.particleSettings.scaleXEndMin"
-                :max.sync="data.particleSettings.scaleXEndMax"
+                v-model:min="data.particleSettings.scaleXEndMin"
+                v-model:max="data.particleSettings.scaleXEndMax"
               />
             </help>
             <select-value
@@ -539,8 +539,8 @@
                 label="Start Y Scale"
                 :lower-limit="0"
                 :step="0.1"
-                :min.sync="data.particleSettings.scaleYStartMin"
-                :max.sync="data.particleSettings.scaleYStartMax"
+                v-model:min="data.particleSettings.scaleYStartMin"
+                v-model:max="data.particleSettings.scaleYStartMax"
               />
             </help>
             <help text="Particle end y scale value">
@@ -548,8 +548,8 @@
                 label="End Y Scale"
                 :lower-limit="0"
                 :step="0.1"
-                :min.sync="data.particleSettings.scaleYEndMin"
-                :max.sync="data.particleSettings.scaleYEndMax"
+                v-model:min="data.particleSettings.scaleYEndMin"
+                v-model:max="data.particleSettings.scaleYEndMax"
               />
             </help>
             <select-value
@@ -565,8 +565,8 @@
                 label="Start Scale"
                 :lower-limit="0"
                 :step="0.1"
-                :min.sync="data.particleSettings.scaleStartMin"
-                :max.sync="data.particleSettings.scaleStartMax"
+                v-model:min="data.particleSettings.scaleStartMin"
+                v-model:max="data.particleSettings.scaleStartMax"
               />
             </help>
             <help text="Particle end scale value">
@@ -574,8 +574,8 @@
                 label="End Scale"
                 :lower-limit="0"
                 :step="0.1"
-                :min.sync="data.particleSettings.scaleEndMin"
-                :max.sync="data.particleSettings.scaleEndMax"
+                v-model:min="data.particleSettings.scaleEndMin"
+                v-model:max="data.particleSettings.scaleEndMax"
               />
             </help>
             <select-value
@@ -737,7 +737,9 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { computed, watch, getCurrentInstance } from "vue";
+import { ElMessageBox } from "element-plus";
 import ImageSelect from "./imageselect/ImageSelect.vue";
 import ValueGroup from "./values/ValueGroup.vue";
 import NumberValue from "./values/NumberValue.vue";
@@ -761,204 +763,184 @@ import List from "./list/List.vue";
 import SpawnList from "./SpawnList.vue";
 import ChildList from "./ChildList.vue";
 import Help from "./Help.vue";
-
-import { RevoltFX } from "revolt-fx";
 import MinMaxNumberAngleDegreesValue from "./values/MinMaxNumberAngleDegreesValue.vue";
 import ParticleComponentValue from "./values/ParticleComponentValue.vue";
 
-export default {
-  name: "EmitterValues",
-  components: {
-    ParticleComponentValue,
-    MinMaxNumberAngleDegreesValue,
-    Help,
-    ChildList,
-    SpawnList,
-    List,
-    AngleDegreeSlider,
-    ValueDelimiter,
-    ColorValue,
-    MinMaxNumberValue,
-    AngleDegreeValue,
-    ValueElement,
-    SelectValue,
-    NumberValue,
-    ValueGroup,
-    ImageSelect,
-  },
-  props: ["data"],
-  data() {
-    return {
-      spriteTexture: null,
-      mcTexture: null,
-      emitterName: null,
-    };
-  },
-  created() {},
-  mounted() {},
-  methods: {
-    applyFloorY() {
-      this.$confirm("Apply value to all emitters in bundle?", "Warning", {
-        confirmButtonText: "OK",
-        cancelButtonText: "Cancel",
-        type: "warning",
-      }).then(() => {
-        this.$fx.setFloorY(this.data.floorY);
-      });
-    },
-    removeObjectFromList(obj, list) {
-      const index = list.indexOf(obj);
-      if (index != -1) list.splice(index, 1);
-    },
-  },
+const props = defineProps<{ data: any }>();
 
-  computed: {
-    isCircleEmitter() {
-      return this.data.core.type == "circle";
-    },
+const instance = getCurrentInstance();
+const editor = () => instance?.appContext.config.globalProperties.$editor;
+const eventBus = () => instance?.appContext.config.globalProperties.$eventBus;
+const fx = () => instance?.appContext.config.globalProperties.$fx;
 
-    isBoxEmitter() {
-      return this.data.core.type == "box";
-    },
+const isCircleEmitter = computed(() => props.data.core.type === "circle");
+const isBoxEmitter = computed(() => props.data.core.type === "box");
+const isRingEmitter = computed(() => props.data.core.type === "ring");
 
-    isRingEmitter() {
-      return this.data.core.type == "ring";
-    },
+const emitterTypes = [
+  { value: "circle", name: "Circle" },
+  { value: "ring", name: "Ring" },
+  { value: "box", name: "Box" },
+];
 
-    emitterTypes() {
-      return [
-        { value: "circle", name: "Circle" },
-        { value: "ring", name: "Ring" },
-        { value: "box", name: "Box" },
-      ];
-    },
-    componentTypes() {
-      const ret = [{ value: 0, name: "Sprite" }];
-      if (this.$editor.movieClipsCount > 0) {
-        ret.push({ value: 1, name: "MovieClip" });
-      }
-      return ret;
-    },
-    blendModes() {
-      return [
-        { value: 0, name: "Normal" },
-        { value: 1, name: "Add" },
-        { value: 2, name: "Multiply" },
-        { value: 3, name: "Screen" },
-      ];
-    },
-    easingTypes() {
-      return [
-        { value: "linear", name: "" },
-        { value: "easeInQuad", name: "" },
-        { value: "easeOutQuad", name: "" },
-        { value: "easeInOutQuad", name: "" },
-        { value: "easeInCubic", name: "" },
-        { value: "easeOutCubic", name: "" },
-        { value: "easeInOutCubic", name: "" },
-        { value: "easeInQuart", name: "" },
-        { value: "easeOutQuart", name: "" },
-        { value: "easeInOutQuart", name: "" },
-        { value: "easeInQuint", name: "" },
-        { value: "easeOutQuint", name: "" },
-        { value: "easeInOutQuint", name: "" },
-        { value: "easeInSine", name: "" },
-        { value: "easeOutSine", name: "" },
-        { value: "easeInSine", name: "" },
-        { value: "easeInOutSine", name: "" },
-        { value: "easeInExpo", name: "" },
-        { value: "easeOutExpo", name: "" },
-        { value: "easeInOutExpo", name: "" },
-        { value: "easeInCirc", name: "" },
-        { value: "easeOutCirc", name: "" },
-        { value: "easeInOutCirc", name: "" },
-        { value: "easeInElastic", name: "" },
-        { value: "easeOutElastic", name: "" },
-        { value: "easeInOutElastic", name: "" },
-        { value: "easeInBack", name: "" },
-        { value: "easeOutBack", name: "" },
-        { value: "easeInBounce", name: "" },
-        { value: "easeOutBounce", name: "" },
-        { value: "easeInOutBounce", name: "" },
-      ];
-    },
-    textures() {
-      if (this.data.particleSettings.componentType == 0) {
-        return this.$editor.spritesheetImagesList;
-      }
-      return this.$editor.moveClipImagesList;
-    },
-  },
-  watch: {
-    "data.useGravity": {
-      handler(newVal, oldVal) {
-        this.$editor.layers.floorGizmo.visible =
-          newVal && this.data.useFloor && this.data.floorY > 0;
-      },
-    },
-    "data.useFloor": {
-      handler(newVal, oldVal) {
-        this.$editor.layers.floorGizmo.visible =
-          newVal && this.data.useGravity && this.data.floorY > 0;
-      },
-    },
-    "data.floorY": {
-      handler(newVal, oldVal) {
-        this.$editor.layers.floorGizmo.y = newVal;
-      },
-    },
-    "data.core.type": {
-      handler(newVal, oldVal) {
-        this.$eventBus.$emit(EVENT_EMITTER_CORE_CHANGED, newVal);
-      },
-    },
-    "data.childs": {
-      handler(newVal, oldVal) {
-        this.$eventBus.$emit(EVENT_EMITTER_CHILDS_CHANGED, newVal);
-      },
-    },
-    "data.core.params.radius": {
-      handler(newVal, oldVal) {
-        this.$eventBus.$emit(EVENT_EMITTER_CORE_PARAMS_CHANGED, newVal);
-      },
-    },
-    "data.core.params.angle": {
-      handler(newVal, oldVal) {
-        this.$eventBus.$emit(EVENT_EMITTER_CORE_PARAMS_CHANGED, newVal);
-      },
-    },
-    "data.core.params.width": {
-      handler(newVal, oldVal) {
-        this.$eventBus.$emit(EVENT_EMITTER_CORE_PARAMS_CHANGED, newVal);
-      },
-    },
-    "data.core.params.height": {
-      handler(newVal, oldVal) {
-        this.$eventBus.$emit(EVENT_EMITTER_CORE_PARAMS_CHANGED, newVal);
-      },
-    },
-    "data.infinite": {
-      handler(newVal, oldVal) {
-        this.$eventBus.$emit(EVENT_EMITTER_INFINITE_CHANGED, newVal);
-      },
-    },
-    "data.duration": {
-      handler() {
-        this.$eventBus.$emit(EVENT_EMITTER_DURATION_CHANGED);
-      },
-    },
-    "data.rotation": {
-      handler(newVal, oldVal) {
-        this.$eventBus.$emit(EVENT_EMITTER_ROTATION_CHANGED, newVal);
-      },
-    },
-    "data.autoRotation": {
-      handler(newVal, oldVal) {
-        this.$eventBus.$emit(EVENT_EMITTER_AUTO_ROTATION_CHANGED, newVal);
-      },
-    },
-  },
-};
+const componentTypes = computed(() => {
+  const ret = [{ value: 0, name: "Sprite" }];
+  if (editor()?.movieClipsCount > 0) {
+    ret.push({ value: 1, name: "MovieClip" });
+  }
+  return ret;
+});
+
+const blendModes = [
+  { value: 0, name: "Normal" },
+  { value: 1, name: "Add" },
+  { value: 2, name: "Multiply" },
+  { value: 3, name: "Screen" },
+];
+
+const easingTypes = [
+  { value: "linear", name: "" },
+  { value: "easeInQuad", name: "" },
+  { value: "easeOutQuad", name: "" },
+  { value: "easeInOutQuad", name: "" },
+  { value: "easeInCubic", name: "" },
+  { value: "easeOutCubic", name: "" },
+  { value: "easeInOutCubic", name: "" },
+  { value: "easeInQuart", name: "" },
+  { value: "easeOutQuart", name: "" },
+  { value: "easeInOutQuart", name: "" },
+  { value: "easeInQuint", name: "" },
+  { value: "easeOutQuint", name: "" },
+  { value: "easeInOutQuint", name: "" },
+  { value: "easeInSine", name: "" },
+  { value: "easeOutSine", name: "" },
+  { value: "easeInSine", name: "" },
+  { value: "easeInOutSine", name: "" },
+  { value: "easeInExpo", name: "" },
+  { value: "easeOutExpo", name: "" },
+  { value: "easeInOutExpo", name: "" },
+  { value: "easeInCirc", name: "" },
+  { value: "easeOutCirc", name: "" },
+  { value: "easeInOutCirc", name: "" },
+  { value: "easeInElastic", name: "" },
+  { value: "easeOutElastic", name: "" },
+  { value: "easeInOutElastic", name: "" },
+  { value: "easeInBack", name: "" },
+  { value: "easeOutBack", name: "" },
+  { value: "easeInBounce", name: "" },
+  { value: "easeOutBounce", name: "" },
+  { value: "easeInOutBounce", name: "" },
+];
+
+const textures = computed(() => {
+  if (props.data.particleSettings.componentType === 0) {
+    return editor()?.spritesheetImagesList ?? [];
+  }
+  return editor()?.moveClipImagesList ?? [];
+});
+
+function applyFloorY() {
+  ElMessageBox.confirm("Apply value to all emitters in bundle?", "Warning", {
+    confirmButtonText: "OK",
+    cancelButtonText: "Cancel",
+    type: "warning",
+  }).then(() => {
+    fx()?.setFloorY(props.data.floorY);
+  });
+}
+
+function removeObjectFromList(obj: any, list: any[]) {
+  const index = list.indexOf(obj);
+  if (index !== -1) list.splice(index, 1);
+}
+
+watch(
+  () => props.data.useGravity,
+  (newVal) => {
+    const ed = editor();
+    if (ed?.layers?.floorGizmo) {
+      ed.layers.floorGizmo.visible =
+        newVal && props.data.useFloor && props.data.floorY > 0;
+    }
+  }
+);
+watch(
+  () => props.data.useFloor,
+  (newVal) => {
+    const ed = editor();
+    if (ed?.layers?.floorGizmo) {
+      ed.layers.floorGizmo.visible =
+        newVal && props.data.useGravity && props.data.floorY > 0;
+    }
+  }
+);
+watch(
+  () => props.data.floorY,
+  (newVal) => {
+    const ed = editor();
+    if (ed?.layers?.floorGizmo) ed.layers.floorGizmo.y = newVal;
+  }
+);
+watch(
+  () => props.data.core.type,
+  (newVal) => {
+    eventBus()?.$emit(EVENT_EMITTER_CORE_CHANGED, newVal);
+  }
+);
+watch(
+  () => props.data.childs,
+  () => {
+    eventBus()?.$emit(EVENT_EMITTER_CHILDS_CHANGED, props.data.childs);
+  }
+);
+watch(
+  () => props.data.core.params.radius,
+  (newVal) => {
+    eventBus()?.$emit(EVENT_EMITTER_CORE_PARAMS_CHANGED, newVal);
+  }
+);
+watch(
+  () => props.data.core.params.angle,
+  (newVal) => {
+    eventBus()?.$emit(EVENT_EMITTER_CORE_PARAMS_CHANGED, newVal);
+  }
+);
+watch(
+  () => props.data.core.params.width,
+  (newVal) => {
+    eventBus()?.$emit(EVENT_EMITTER_CORE_PARAMS_CHANGED, newVal);
+  }
+);
+watch(
+  () => props.data.core.params.height,
+  (newVal) => {
+    eventBus()?.$emit(EVENT_EMITTER_CORE_PARAMS_CHANGED, newVal);
+  }
+);
+watch(
+  () => props.data.infinite,
+  (newVal) => {
+    eventBus()?.$emit(EVENT_EMITTER_INFINITE_CHANGED, newVal);
+  }
+);
+watch(
+  () => props.data.duration,
+  () => {
+    eventBus()?.$emit(EVENT_EMITTER_DURATION_CHANGED);
+  }
+);
+watch(
+  () => props.data.rotation,
+  (newVal) => {
+    eventBus()?.$emit(EVENT_EMITTER_ROTATION_CHANGED, newVal);
+  }
+);
+watch(
+  () => props.data.autoRotation,
+  (newVal) => {
+    eventBus()?.$emit(EVENT_EMITTER_AUTO_ROTATION_CHANGED, newVal);
+  }
+);
 </script>
 
 <style lang="scss" scoped>

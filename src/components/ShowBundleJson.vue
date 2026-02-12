@@ -13,34 +13,40 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, getCurrentInstance } from 'vue'
+import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 
-export default {
-  name: 'ShowBundleJson',
-  props: [],
-  data() {
-    return { visible: false, bundle: '' }
-  },
-  methods: {
-    show() {
-      this.visible = true
-      this.bundle = JSON.stringify(this.$store.state.bundle)
-    },
-    async copy() {
-      try {
-        await navigator.clipboard.writeText(this.bundle)
-        ElMessage.success('Copied')
-      } catch {
-        ElMessage.error('Error')
-      }
-    },
-    save() {
-      const b = this.$store.state.bundle
-      this.$editor.saveJsonLocal(b.name || 'bundle', b)
-    },
-  },
+defineOptions({ name: 'ShowBundleJson' })
+
+const store = useStore()
+const instance = getCurrentInstance()
+const editor = () => instance?.appContext.config.globalProperties.$editor
+
+const visible = ref(false)
+const bundle = ref('')
+
+function show() {
+  visible.value = true
+  bundle.value = JSON.stringify(store.state.bundle)
 }
+
+async function copy() {
+  try {
+    await navigator.clipboard.writeText(bundle.value)
+    ElMessage.success('Copied')
+  } catch {
+    ElMessage.error('Error')
+  }
+}
+
+function save() {
+  const b = store.state.bundle
+  editor()?.saveJsonLocal(b.name || 'bundle', b)
+}
+
+defineExpose({ show })
 </script>
 
 <style lang="scss" scoped>

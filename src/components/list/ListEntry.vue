@@ -1,68 +1,46 @@
 <template>
-  <div :class="{entry:true, selected:selected, master:!isSubEntry, 'sub-entry':isSubEntry}" layout="row center-left" @click="select">
-    <span v-if="prefix != null" class="prefix">{{prefix}}</span>
+  <div :class="{entry:true, selected, master:!isSubEntry, 'sub-entry':isSubEntry}" layout="row center-left" @click="select">
+    <span v-if="prefix != null" class="prefix">{{ prefix }}</span>
     <div class="thumb" v-if="icon">
       <img :src="icon"/>
     </div>
-    <span :class="{sub:isSubEntry}">{{this.name}}</span>
+    <span :class="{sub:isSubEntry}">{{ name }}</span>
     <el-icon class="delete-icon" @click.stop="remove"><Delete /></el-icon>
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { computed } from 'vue'
 import { Delete } from '@element-plus/icons-vue'
 
-export default {
-  name: 'ListEntry',
-  components: { Delete },
-  props: ['data', 'selectedElement', 'nameCallback', 'prefixCallback', 'iconCallback', 'subEntryFilter'],
-    data() {
-      return {
-        listEntry: true,
-        name:''
-      }
-    },
-    computed: {
-      prefix() {
-        if (this.prefixCallback) {
-          return this.prefixCallback(this.data);
-        }
-        return null;
-      },
-      selected() {
-        return this.selectedElement === this
-      },
-      icon() {
-        if (this.iconCallback) {
-          const i = this.iconCallback(this.data);
-          return i;
-        }
-        return null;
-      },
-      isSubEntry() {
-        this.getName();
-        return this.name.indexOf(this.subEntryFilter) > -1;
-      }
+const props = defineProps<{
+  data: any
+  selectedElement: any
+  nameCallback?: (data: any) => string
+  prefixCallback?: (data: any) => string | null
+  iconCallback?: (data: any) => string | null
+  subEntryFilter?: string
+}>()
 
-    },
-    methods: {
-      select(e) {
-        this.$emit('select', this);
-      },
-      remove(e) {
-        this.$emit('remove', this);
-      },
-      getName() {
-        this.name = this.nameCallback ? this.nameCallback(this.data) : this.data.name
-      }
-    },
-    watch: {
-      'data': {
-        handler(newVal, oldVal) {
-        }
-      }
-    }
-  }
+const emit = defineEmits<{ select: [entry: any]; remove: [entry: any] }>()
+
+const name = computed(() => (props.nameCallback ? props.nameCallback(props.data) : (props.data?.name ?? '')))
+
+const prefix = computed(() => (props.prefixCallback ? props.prefixCallback(props.data) : null))
+
+const selected = computed(() => props.selectedElement?.data === props.data)
+
+const icon = computed(() => (props.iconCallback ? props.iconCallback(props.data) : null))
+
+const isSubEntry = computed(() => (props.subEntryFilter ? name.value.indexOf(props.subEntryFilter) > -1 : false))
+
+function select() {
+  emit('select', { data: props.data })
+}
+
+function remove() {
+  emit('remove', { data: props.data })
+}
 </script>
 
 <style lang="scss" scoped>

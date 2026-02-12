@@ -1,6 +1,6 @@
 import 'es6-promise/auto'
-import './canvas-will-read-frequently.js'
-import './pixi-global.js'
+import './canvas-will-read-frequently.ts'
+import './pixi-global.ts'
 import { createApp } from 'vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
@@ -9,17 +9,17 @@ import 'flex-layout-attribute'
 import '@/css/main.scss'
 
 import App from './App.vue'
-import store from './store'
-import { eventBus } from './eventBus'
-import { Editor } from './editor/editor.js'
+import store from './store.ts'
+import { eventBus } from './eventBus.ts'
+import { Editor } from './editor/editor.ts'
 
-async function init() {
+async function init(): Promise<void> {
   const { FX } = await import('revolt-fx')
   const fx = new FX()
   Editor.fx = fx
 
   const app = createApp(App)
-  app.use(store)
+  app.use(store as any)
   app.use(ElementPlus)
   app.config.globalProperties.$eventBus = eventBus
   app.config.globalProperties.$fx = fx

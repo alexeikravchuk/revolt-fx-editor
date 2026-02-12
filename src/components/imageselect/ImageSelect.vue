@@ -1,5 +1,5 @@
 <template>
-  <div style="position: relative;" @mouseover="over=true" @mouseout="over=false">
+  <div style="position: relative;">
     <div class="current-thumb">
       <image-select-thumb :src="thumbSrc" @select="onShowSelection"/>
     </div>
@@ -24,52 +24,37 @@
   </div>
 </template>
 
-<script>
-  import * as PIXI from 'pixi.js';
-  import ImageSelectThumb from "./ImageSelectThumb.vue";
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+import ImageSelectThumb from './ImageSelectThumb.vue'
 
+defineOptions({ name: 'ImageSelect' })
+const props = defineProps<{ value?: string; textures?: any }>()
+const emit = defineEmits<{ selected: [data: any] }>()
 
-  export default {
-    name: "ImageSelect",
-    components: {ImageSelectThumb},
-    props: ['value', 'textures'],
-    data() {
-      return {
-        thumbSrc: '',
-        over: false,
-        paneVisible: false
-      }
-    },
-    mounted() {
-      this.thumbSrc = this.value;
-    },
-    watch: {
-      value() {
-        this.thumbSrc = this.value;
-      }
-    },
-    methods: {
-      init(currentTexture, textures) {
-      },
-      onShowSelection(e) {
-        this.paneVisible = true;
-        document.addEventListener('click', this.onDocumentClicked);
-      },
-      onImageSelected(image) {
-        this.$emit('selected', image.data);
-        this.closePane();
-      },
-      onDocumentClicked() {
-        this.closePane();
-      },
-      closePane() {
-        this.paneVisible = false;
-        document.removeEventListener('click', this.onDocumentClicked);
-      }
+const thumbSrc = ref(props.value ?? '')
+const paneVisible = ref(false)
 
-    }
+watch(() => props.value, (v) => { thumbSrc.value = v ?? '' })
 
-  }
+function onShowSelection() {
+  paneVisible.value = true
+  document.addEventListener('click', onDocumentClicked)
+}
+
+function onImageSelected(image: any) {
+  emit('selected', image.data)
+  closePane()
+}
+
+function onDocumentClicked() {
+  closePane()
+}
+
+function closePane() {
+  paneVisible.value = false
+  document.removeEventListener('click', onDocumentClicked)
+}
 </script>
 
 <style lang="scss" scoped>

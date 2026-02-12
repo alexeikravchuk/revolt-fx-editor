@@ -43,41 +43,38 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
 import NewBundle from './NewBundle.vue'
 import SaveBundle from './SaveBundle.vue'
 import LoadBundle from './LoadBundle.vue'
 import ShowBundleJson from './ShowBundleJson.vue'
 
-export default {
-  name: 'TopMenu',
-  components: { ArrowDown, ShowBundleJson, LoadBundle, SaveBundle, NewBundle },
-    data() {
-      return {}
-    },
-    methods: {
-      handleMenuItem(item) {
-        switch (item) {
-          case 'new_bundle':
-            this.$refs.newBundlePanel.show();
-            break;
+const newBundlePanel = ref<InstanceType<typeof NewBundle> | null>(null)
+const loadBundlePanel = ref<InstanceType<typeof LoadBundle> | null>(null)
+const saveBundlePanel = ref<InstanceType<typeof SaveBundle> | null>(null)
+const showBundleJsonPanel = ref<InstanceType<typeof ShowBundleJson> | null>(null)
 
-          case 'load_bundle':
-            this.$refs.loadBundlePanel.show();
-            break;
+const handleMenuItem = (item: string) => {
+  switch (item) {
+    case 'new_bundle':
+      newBundlePanel.value?.show()
+      break
 
-          case 'save_bundle':
-            this.$refs.saveBundlePanel.show();
-            break;
+    case 'load_bundle':
+      loadBundlePanel.value?.show()
+      break
 
-          case 'show_json':
-            this.$refs.showBundleJsonPanel.show();
-            break;
-        }
-      }
-    }
+    case 'save_bundle':
+      saveBundlePanel.value?.show()
+      break
+
+    case 'show_json':
+      showBundleJsonPanel.value?.show()
+      break
   }
+}
 </script>
 
 <style scoped>
